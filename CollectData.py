@@ -6,8 +6,8 @@ import datetime as dt
 import os 
 
 # Notion APT details
-NOTION_API_KEY = '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'
-DATABASE_ID = '7decdbb42cbf4aa1bb16e7083b427c09'
+NOTION_API_KEY = ''
+DATABASE_ID = ''
 HEADERS = {
     'Authorization': f'Bearer {NOTION_API_KEY}', 
     'Content-Type': 'application/json', 
