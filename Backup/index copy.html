@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .chart-container { width: 80%; margin: auto; padding: 20px; }
+    </style>
+</head>
+<body>
+    <h2>CSV Data Visualization</h2>
+    
+    <h3>Progression Over Time</h3>
+    <div class="chart-container">
+        <canvas id="progressionChart"></canvas>
+    </div>
+    
+    <h3>Walking Activity</h3>
+    <div class="chart-container">
+        <canvas id="walkingChart"></canvas>
+    </div>
+
+    <script>
+        async function loadCSVData() {
+            const response = await fetch('March_2025.csv'); // Ensure the CSV file is placed in the same directory
+            const text = await response.text();
+            
+            const rows = text.split("\n").map(row => row.split(","));
+            const headers = rows.shift(); // Extract column headers
+            
+            // Extract relevant data
+            const labels = rows.map(row => row[1]); // Date column
+            const progressionValues = rows.map(row => parseFloat(row[2])); // Progression column
+            const walkingValues = rows.map(row => parseFloat(row[8])); // Walking column
+            
+            drawChart("progressionChart", "line", labels, progressionValues, "Progression Over Time", "blue");
+            drawChart("walkingChart", "bar", labels, walkingValues, "Walking Time (minutes)", "green");
+        }
+
+        function drawChart(canvasId, type, labels, data, label, color) {
+            new Chart(document.getElementById(canvasId), {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: color,
+                        fill: type === "bar"
+                    }]
+                }
+            });
+        }
+
+        // Load CSV and visualize
+        loadCSVData();
+    </script>
+</body>
+</html>
