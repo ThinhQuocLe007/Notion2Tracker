@@ -4,19 +4,15 @@ import pandas as pd
 import plotly.express as px 
 import datetime as dt 
 import os 
+import mysql.connector 
+from mysql.connector import Error
+from config import NOTION_API_KEY, DATABASE_ID, MYSQL_HOST, MYSQL_DATABASE, MYSQL_USER, MYSQL_PASSWORD
 
-# Notion APT details
-NOTION_API_KEY = ''
-DATABASE_ID = ''
 HEADERS = {
     'Authorization': f'Bearer {NOTION_API_KEY}', 
     'Content-Type': 'application/json', 
     'Notion-Version': '2022-06-28'
 }
-
-# Clear the output 
-def clear_console(): 
-    os.system('clear' if os.name == 'posix' else 'cls') 
 
 
 # Fetch data 
@@ -53,48 +49,75 @@ def fetch_notion_data():
         records.append(row)
     return records
 
+# Establish a connection
+def save2mysql(data):  
+    try:
+        connection = mysql.connector.connect(
+            host= MYSQL_HOST, 
+            database = MYSQL_DATABASE,
+            user= MYSQL_USER, 
+            password= MYSQL_PASSWORD
+        )
+        if connection.is_connected(): 
+            cursor = connection.cursor() 
 
+            # create table if not exist 
+            create_table_query = """
+            create table if not exists notion_data(
+                id int auto_increment primary key, 
+                Name varchar(255), 
+                Date DATE, 
+                Progression FLOAT, 
+                Formula FLOAT, 
+                DATA_TIME FLOAT, 
+                ENGLISH_TIME FLOAT, 
+                OTHER_TIME FLOAT, 
+                RELAX_TIME FLOAT, 
+                Walking FLOAT, 
+                NoFap BOOLEAN 
+            ) ; 
+            """
+            cursor.execute(create_table_query) 
+            # Insert data into the table 
+            insert_query = """
+            insert into notion_data (Name, Date,Progression,Formula, DATA_TIME, ENGLISH_TIME, OTHER_TIME, RELAX_TIME, Walking, NoFap)
+            values (%s, %s, %s,%s,%s, %s, %s, %s, %s, %s) ; 
+            """
+            for record in data: 
+                cursor.execute(insert_query, (
+                    record['Name'], 
+                    record['Date'],
+                    record['Progression'], 
+                    record['Formula'], 
+                    record['DATA_TIME'], 
+                    record['ENGLISH_TIME'], 
+                    record['OTHER_TIME'], 
+                    record['RELAX_TIME'], 
+                    record['Walking'],
+                    record['NoFap']
+                )) 
+            
+            connection.commit() 
+            print('Data saved to mysql sucessfully')
+    except Error as e: 
+        print(f'Error: {e}')
 
-def filter_and_save(data): 
-    df = pd.DataFrame(data)
-    
-    # Filter the month 
-    df['Date'] = pd.to_datetime(df['Date']) 
-    current_month = dt.datetime.now().month 
-    current_year = dt.datetime.now().year
+    finally: 
+        if connection.is_connected(): 
+            cursor.close() 
+            connection.close() 
+            print('Mysql connection is closed')
 
-    df_filtered = df[(df['Date'].dt.month == current_month ) & (df['Date'].dt.year == current_year)]
-    df_filtered = df_filtered.sort_values(by= 'Date', ascending= True) 
-
-    # save to csv 
-    month_map = {
-    1: "January",
-    2: "February",
-    3: "March",
-    4: "April",
-    5: "May",
-    6: "June",
-    7: "July",
-    8: "August",
-    9: "September",
-    10: "October",
-    11: "November",
-    12: "December"
-    }
-
-    fix_path = '/home/lequocthinh/Desktop/pythonCode/Project/TRACKER/'
-    file_name = f'{month_map[current_month]}_{current_year}.csv'
-    file_path = os.path.join(fix_path, file_name)
-    df_filtered.to_csv(file_path, index= False)
-    print(f'Data saved at: {file_name}')
 
 def main(): 
     # Clean the file.log ( temporary ) 
     file_path = '/home/lequocthinh/cron_test.log' 
     with open(file_path, 'w') as f: 
         f.write("") 
+    
+    # Fetch and Save data 
     data = fetch_notion_data() 
-    filter_and_save(data) 
+    save2mysql(data)
 
 if __name__ == '__main__': 
     main()
