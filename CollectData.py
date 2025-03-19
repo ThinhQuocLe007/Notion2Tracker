@@ -1,4 +1,13 @@
 #!/usr/bin/python3
+
+# TODO: 
+# 1. Create Notion API 
+# 2. Fetch data from Notion 
+# 3. Preprocess data 
+# 4. Save to mysql 
+# 5. Set up crontab for automatic running 
+
+# Import lib 
 import requests 
 import pandas as pd 
 import plotly.express as px 
@@ -75,7 +84,7 @@ def save2mysql(data):
                 RELAX_TIME FLOAT, 
                 Walking FLOAT, 
                 NoFap BOOLEAN 
-            ) ; 
+            ); 
             """
             cursor.execute(create_table_query) 
             # Insert data into the table 
@@ -117,7 +126,8 @@ def main():
     
     # Fetch and Save data 
     data = fetch_notion_data() 
-    save2mysql(data)
+    if data: 
+        save2mysql(data) 
 
 if __name__ == '__main__': 
     main()
