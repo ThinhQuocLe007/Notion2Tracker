@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Formula Chart with Year and Month Filters</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    select {
+      padding: 8px;
+      margin: 10px;
+    }
+    canvas {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📊 Formula Over Time</h2>
+
+  <label for="yearFilter">Year:</label>
+  <select id="yearFilter">
+    <option value="all">All</option>
+  </select>
+
+  <label for="monthFilter">Month:</label>
+  <select id="monthFilter">
+    <option value="all">All</option>
+  </select>
+
+  <canvas id="formulaChart" width="800" height="400"></canvas>
+
+  <script>
+    let chart;
+    let allData = [];
+
+    // Helper functions to extract year and month
+    function getYear(dateStr) {
+      return new Date(dateStr).getFullYear();
+    }
+
+    function getMonth(dateStr) {
+      return String(new Date(dateStr).getMonth() + 1).padStart(2, '0');
+    }
+
+    // Fill dropdowns dynamically
+    function populateYearMonthDropdowns() {
+      const years = new Set();
+      const months = new Set();
+
+      allData.forEach(item => {
+        years.add(getYear(item.Date));
+        months.add(getMonth(item.Date));
+      });
+
+      const yearSelect = document.getElementById('yearFilter');
+      const monthSelect = document.getElementById('monthFilter');
+
+      [...years].sort().forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+      });
+
+      [...months].sort().forEach(month => {
+        const option = document.createElement('option');
+        option.value = month;
+        option.textContent = month;
+        monthSelect.appendChild(option);
+      });
+    }
+
+    // Filter data and update chart
+    function filterDataByYearMonth(year, month) {
+      let filtered = allData;
+
+      if (year !== 'all') {
+        filtered = filtered.filter(item => getYear(item.Date).toString() === year);
+      }
+
+      if (month !== 'all') {
+        filtered = filtered.filter(item => getMonth(item.Date) === month);
+      }
+
+      updateChart(filtered);
+    }
+
+    // Update chart with filtered data
+    function updateChart(filteredData) {
+      const labels = filteredData.map(item => item.Date);
+      const values = filteredData.map(item => parseFloat(item.Formula));
+
+      if (chart) chart.destroy();
+
+      const ctx = document.getElementById('formulaChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Formula',
+            data: values,
+            borderColor: 'blue',
+            backgroundColor: 'rgba(0, 0, 255, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' },
+            title: {
+              display: true,
+              text: 'Formula Value Per Day'
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Formula'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Fetch data from backend
+    fetch('get_data.php')
+      .then(res => res.json())
+      .then(data => {
+        allData = data;
+        populateYearMonthDropdowns();
+        updateChart(allData);
+      })
+      .catch(err => console.error('Error fetching data:', err));
+
+    // Listen for dropdown changes
+    document.getElementById('yearFilter').addEventListener('change', () => {
+      const year = document.getElementById('yearFilter').value;
+      const month = document.getElementById('monthFilter').value;
+      filterDataByYearMonth(year, month);
+    });
+
+    document.getElementById('monthFilter').addEventListener('change', () => {
+      const year = document.getElementById('yearFilter').value;
+      const month = document.getElementById('monthFilter').value;
+      filterDataByYearMonth(year, month);
+    });
+  </script>
+
+</body>
+</html>
