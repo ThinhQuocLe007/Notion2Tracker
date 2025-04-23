@@ -53,33 +53,47 @@
       return String(new Date(dateStr).getMonth() + 1).padStart(2, '0');
     }
 
-    // Fill dropdowns dynamically
     function populateYearMonthDropdowns() {
-      const years = new Set();
-      const months = new Set();
+    const years = new Set();
+    const months = new Set();
 
-      allData.forEach(item => {
-        years.add(getYear(item.Date));
-        months.add(getMonth(item.Date));
-      });
+    allData.forEach(item => {
+      years.add(getYear(item.Date));
+      months.add(getMonth(item.Date));
+    });
 
-      const yearSelect = document.getElementById('yearFilter');
-      const monthSelect = document.getElementById('monthFilter');
+    const yearSelect = document.getElementById('yearFilter');
+    const monthSelect = document.getElementById('monthFilter');
 
-      [...years].sort().forEach(year => {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearSelect.appendChild(option);
-      });
+    // Clear existing options except "All"
+    yearSelect.innerHTML = '<option value="all">All</option>';
+    monthSelect.innerHTML = '<option value="all">All</option>';
 
-      [...months].sort().forEach(month => {
-        const option = document.createElement('option');
-        option.value = month;
-        option.textContent = month;
-        monthSelect.appendChild(option);
-      });
-    }
+    [...years].sort().forEach(year => {
+      const option = document.createElement('option');
+      option.value = year;
+      option.textContent = year;
+      yearSelect.appendChild(option);
+    });
+
+    [...months].sort().forEach(month => {
+      const option = document.createElement('option');
+      option.value = month;
+      option.textContent = month;
+      monthSelect.appendChild(option);
+    });
+
+    // ✅ Set default filter to current year and month
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+
+    yearSelect.value = currentYear;
+    monthSelect.value = currentMonth;
+
+    filterDataByYearMonth(currentYear.toString(), currentMonth);
+  }
+
 
     // Filter data and update chart
     function filterDataByYearMonth(year, month) {
