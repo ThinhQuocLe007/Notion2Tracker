@@ -69,28 +69,19 @@ def save2mysql(data):
         )
         if connection.is_connected(): 
             cursor = connection.cursor() 
-
-            # create table if not exist 
-            create_table_query = """
-            create table if not exists notion_data(
-                id int auto_increment primary key, 
-                Name varchar(255), 
-                Date DATE, 
-                Progression FLOAT, 
-                Formula FLOAT, 
-                DATA_TIME FLOAT, 
-                ENGLISH_TIME FLOAT, 
-                OTHER_TIME FLOAT, 
-                RELAX_TIME FLOAT, 
-                Walking FLOAT, 
-                NoFap BOOLEAN 
-            ); 
-            """
-            cursor.execute(create_table_query) 
             # Insert data into the table 
             insert_query = """
             insert into notion_data (Name, Date,Progression,Formula, DATA_TIME, ENGLISH_TIME, OTHER_TIME, RELAX_TIME, Walking, NoFap)
-            values (%s, %s, %s,%s,%s, %s, %s, %s, %s, %s) ; 
+            values (%s, %s, %s,%s,%s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            Progression = VALUES(Progression),
+            Formula = VALUES(Formula), 
+            DATA_TIME = VALUES(DATA_TIME), 
+            ENGLISH_TIME = VALUES(ENGLISH_TIME), 
+            OTHER_TIME = VALUES(OTHER_TIME), 
+            RELAX_TIME = VALUES(RELAX_TIME), 
+            Walking = VALUES(Walking), 
+            NoFap = VALUES(NoFap) ;
             """
             for record in data: 
                 cursor.execute(insert_query, (
