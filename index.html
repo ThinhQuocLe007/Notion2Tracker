@@ -1,34 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Formula & Walking Tracker</title>
-  <link rel="stylesheet" href="styles.css" />
+    <title>My first chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <h2> Bar chart example</h2>
+    <canvas id="myChart" width="400" height="200"></canvas>
 
-  <header>
-    <h2>📊 Formula & Walking Tracker</h2>
-  </header>
+    
+    <script>
+        // Javascript to draw the chart 
+        const ctx = document.getElementById('myChart').getContext('2d') ; 
 
-  <section id="filters">
-    <label for="yearFilter">Year:</label>
-    <select id="yearFilter"><option value="all">All</option></select>
+        const myChart = new Chart(ctx, {
+            type: 'bar', 
+            data: {
+                labels: ['Red', 'Blue', 'Yellow', 'Green,', 'Purple'], 
+                datasets: [{
+                    label: 'My first chart', 
+                    data:[12,19,3,5,2], 
+                    backgroundCoolor: 'rbga(54,162,235,0.5)'
+                }]
+            }
+        })
+    </script>
 
-    <label for="monthFilter">Month:</label>
-    <select id="monthFilter"><option value="all">All</option></select>
-
-    <button id="updateButton">🔄 Update Data</button>
-  </section>
-
-  <main class="chart-container">
-    <canvas id="formulaChart" data-key="Formula" data-color="blue"></canvas>
-    <canvas id="walkingChart" data-key="Walking" data-color="green"></canvas>
-  </main>
-
-  <footer><small>&copy; 2025 You</small></footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="scripts.js" defer></script>
 </body>
+
+
 </html>
