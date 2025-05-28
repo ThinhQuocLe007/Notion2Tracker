@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fetch_data</title>
+</head>
+<body>
+    <h2>Console output of fetch data</h2>
+
+    <script>
+        // Fetch struc 
+        fetch('fetch_data.php')
+        .then(response => response.json()) // convert to json 
+        .then(data => {
+            // Find this week 
+            const today = new Date() ; 
+            
+            const startOfWeek = new Date(today) ; 
+            const dayOfWeek = startOfWeek.getDay() ; 
+            const diff = dayOfWeek === 0 ? 6 : dayOfWeek -1 ; 
+            startOfWeek.setDate(today.getDate() - diff) ; 
+            startOfWeek.setHours(0, 0, 0, 0) ; // reset time 
+
+            // Filter the data 
+            const filtered = data.filter(item => {
+                const itemDate = new Date(item.Date) ; 
+                return itemDate >= startOfWeek ; 
+            })
+            
+            // Display on html 
+            filtered.forEach(item => {
+                const p = document.createElement('p') ; 
+                p.textContent = `${item.Date}: ${item.Formula}` ; 
+                document.body.appendChild(p) ; 
+            }) ; 
+
+        }) // process the data 
+        .catch(error =>{
+            console.error('Error fetch data', error) ; 
+        }) ; 
+    </script>
+</body>
+</html>
