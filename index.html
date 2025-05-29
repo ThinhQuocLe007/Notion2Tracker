@@ -1,71 +1,20 @@
 <!DOCTYPE html>
-<html> 
+<html>
 <head>
-    <title>Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <style>
-        #time_allocation_chart {
-            max-width: 1200px;
-            max-height: 800px;
-            width: 100%;
-            height: auto;
-            display: block;
-            margin: auto;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js" defer></script> <!-- ✅ must be exactly like this -->
 </head>
 <body>
-    <h2> TIME ALLOCATION</h2>
-    <canvas id="time_allocation_chart"></canvas>
+  <h2>TIME ALLOCATION</h2>
 
-    <script>
-        fetch('fetch_data.php')
-        .then(response => response.json())
-        .then(data =>{
-            // Step 1: Filter data by month
-            const today = new Date() ; 
-            const currentYear = today.getFullYear() ; 
-            const currentMonth = today.getMonth() ; 
-            
-            const filtered = data.filter(item =>{
-                const itemDate = new Date(item.Date) ; // copy date 
-                return (
-                    itemDate.getFullYear() == currentYear && itemDate.getMonth() == currentMonth 
-                ) ; 
-            }) ; 
+  <div id="filter-controls">
+    <button onclick="setFilter('week')">This Week</button>
+    <button onclick="setFilter('month')">This Month</button>
+  </div>
 
-            // Step 2: Extract labels (Date) and values (DATA_TIME) 
-            const labels = filtered.map(item => item.Date) ; 
-            const values = filtered.map(item => Number(item.DATA_TIME)) ;  
-
-            // Step 3: Plot the bar chart 
-            const ctx = document.getElementById('time_allocation_chart').getContext('2d') ; 
-            new Chart(ctx, {
-                type: 'bar', 
-                data: {
-                    labels: labels, 
-                    datasets: [{
-                        label: 'DATA_TIME', 
-                        data: values, 
-                        borderWidth: 1
-                    }]
-                }, 
-                options: {
-                    scales: {
-                        x: {title: {display: true, text: 'Date'}}, 
-                        y: {title: {display: true, text: 'DATA_TIME'}, 
-                        beginAtZero: true
-                        } 
-                    }
-                } 
-            }) ; 
-        }
-            
-        )
-        .catch(error => console.error('Error', error)) ;
-
-    </script>
-
+  <canvas id="time_allocation_chart"></canvas>
 </body>
 </html>
